@@ -1,0 +1,12 @@
+sentence-transformers 
+faiss-cpu 
+numpy
+fastapi
+chromadb
+fastapi
+uvicorn[standard]
+sqlalchemy[asyncio]
+asyncpg
+pydantic
+python-dotenv
+sqlalchemy
