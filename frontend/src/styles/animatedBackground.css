@@ -1,0 +1,147 @@
+.animated-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: radial-gradient(circle at 20% 20%, rgba(67, 255, 139, 0.045), transparent 26%), radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.06), transparent 28%), radial-gradient(circle at 50% 90%, rgba(255, 255, 255, 0.035), transparent 28%);
+}
+
+.bg-glow {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 999px;
+    filter: blur(80px);
+    opacity: 0.13;
+    animation: glowFloat 18s ease-in-out infinite alternate;
+}
+
+.bg-glow-one {
+    left: -140px;
+    top: 12%;
+    background: rgba(67, 255, 139, 0.35);
+}
+
+.bg-glow-two {
+    right: -160px;
+    bottom: 5%;
+    background: rgba(99, 102, 241, 0.4);
+    animation-duration: 24s;
+}
+
+.snowflake {
+    position: absolute;
+    top: -8%;
+    left: var(--left);
+    width: var(--size);
+    height: var(--size);
+    border-radius: 999px;
+    opacity: var(--opacity);
+    filter: blur(var(--blur));
+    background: rgba(255, 255, 255, 0.9);
+    animation-duration: var(--duration);
+    animation-delay: var(--delay);
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.16), 0 0 18px rgba(67, 255, 139, 0.08);
+}
+
+/* Different subtle movement types */
+.snowflake-0 {
+    animation-name: snowfallStraight;
+}
+
+.snowflake-1 {
+    animation-name: snowfallDriftLeft;
+}
+
+.snowflake-2 {
+    animation-name: snowfallDriftRight;
+}
+
+.snowflake-3 {
+    animation-name: snowfallSoftSway;
+}
+
+@keyframes snowfallStraight {
+    0% {
+        transform: translate3d(0, -10vh, 0);
+    }
+
+    100% {
+        transform: translate3d(0, 115vh, 0);
+    }
+}
+
+@keyframes snowfallDriftLeft {
+    0% {
+        transform: translate3d(0, -10vh, 0);
+    }
+
+    50% {
+        transform: translate3d(calc(var(--drift) * -0.5), 55vh, 0);
+    }
+
+    100% {
+        transform: translate3d(calc(var(--drift) * -1), 115vh, 0);
+    }
+}
+
+@keyframes snowfallDriftRight {
+    0% {
+        transform: translate3d(0, -10vh, 0);
+    }
+
+    50% {
+        transform: translate3d(calc(var(--drift) * 0.5), 55vh, 0);
+    }
+
+    100% {
+        transform: translate3d(var(--drift), 115vh, 0);
+    }
+}
+
+@keyframes snowfallSoftSway {
+    0% {
+        transform: translate3d(0, -10vh, 0);
+    }
+
+    25% {
+        transform: translate3d(calc(var(--drift) * 0.35), 25vh, 0);
+    }
+
+    50% {
+        transform: translate3d(calc(var(--drift) * -0.25), 55vh, 0);
+    }
+
+    75% {
+        transform: translate3d(calc(var(--drift) * 0.2), 85vh, 0);
+    }
+
+    100% {
+        transform: translate3d(0, 115vh, 0);
+    }
+}
+
+@keyframes glowFloat {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate3d(40px, -30px, 0) scale(1.08);
+    }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .snowflake,
+    .bg-glow {
+        animation: none;
+    }
+
+    .snowflake {
+        opacity: 0.08;
+    }
+}

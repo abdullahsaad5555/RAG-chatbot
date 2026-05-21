@@ -3,7 +3,7 @@ import Sidebar from "./components/Sidebar";
 import ChatLayout from "./components/ChatLayout";
 import useChats from "./hooks/useChats";
 import useChatSearch from "./hooks/useChatSearch";
-
+import AnimatedBackground from "./components/AnimatedBackground";
 export default function App() {
     const {
         chats,
@@ -26,6 +26,9 @@ export default function App() {
 
     return (
         <div className="flex h-screen w-screen bg-[#09090b] overflow-hidden font-sans text-white">
+
+            <AnimatedBackground />
+
             <Sidebar
                 chats={visibleChats}
                 totalChatsCount={chats.length}
