@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
-import { useState } from "react";
-
 
 export default function Sidebar({
     chats,
+    totalChatsCount,
+    searchQuery,
+    setSearchQuery,
     activeChatId,
     setActiveChatId,
     createChat,
@@ -16,16 +18,18 @@ export default function Sidebar({
 }) {
     return (
         <>
-           
+            {/* MOBILE: overlay */}
             <div
                 className={[
                     "fixed inset-0 z-30 bg-black/50 transition-opacity md:hidden",
-                    isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+                    isOpen
+                        ? "opacity-100 pointer-events-auto"
+                        : "opacity-0 pointer-events-none",
                 ].join(" ")}
                 onClick={onClose}
             />
 
-       
+            {/* MOBILE: drawer */}
             <aside
                 className={[
                     "fixed z-40 top-0 left-0 h-full w-64 md:hidden",
@@ -36,7 +40,10 @@ export default function Sidebar({
                 ].join(" ")}
             >
                 <div className="flex items-center justify-between px-3 py-3 border-b border-zinc-800">
-                    <span className="text-xs tracking-widest text-white/60">CHATS</span>
+                    <span className="text-xs tracking-widest text-white/60">
+                        CHATS
+                    </span>
+
                     <button
                         type="button"
                         onClick={onClose}
@@ -44,16 +51,19 @@ export default function Sidebar({
                         aria-label="Close sidebar"
                         title="Close"
                     >
-                        
+                        <IoMdCloseCircle />
                     </button>
                 </div>
 
                 <SidebarContent
                     chats={chats}
+                    totalChatsCount={totalChatsCount}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
                     activeChatId={activeChatId}
                     setActiveChatId={(id) => {
                         setActiveChatId(id);
-                        onClose(); // close after selecting on mobile
+                        onClose();
                     }}
                     createChat={createChat}
                     deleteChat={deleteChat}
@@ -63,6 +73,7 @@ export default function Sidebar({
                 />
             </aside>
 
+            {/* DESKTOP: sidebar */}
             <aside
                 className={[
                     "hidden md:flex h-full border-r border-zinc-800 bg-black/20 backdrop-blur",
@@ -71,9 +82,11 @@ export default function Sidebar({
                     isOpen ? "w-64" : "w-12",
                 ].join(" ")}
             >
-                {/* Top row: title + collapse/expand */}
                 <div className="flex items-center justify-between px-3 py-3 border-b border-zinc-800">
-                    <span className={`text-xs tracking-widest text-white/60 ${isOpen ? "opacity-100" : "opacity-0"}`}>
+                    <span
+                        className={`text-xs tracking-widest text-white/60 transition-opacity ${isOpen ? "opacity-100" : "opacity-0"
+                            }`}
+                    >
                         CHATS
                     </span>
 
@@ -88,20 +101,22 @@ export default function Sidebar({
                     </button>
                 </div>
 
-                {/* When collapsed, keep only a small action area */}
-                <div className={isOpen ? "block" : "hidden"}>
-                    <SidebarContent
-                        chats={chats}
-                        activeChatId={activeChatId}
-                        setActiveChatId={setActiveChatId}
-                        createChat={createChat}
-                        deleteChat={deleteChat}
-                        loadingChats={loadingChats}
-                        showHideButton={false}
-                    />
-                </div>
-
-                {!isOpen && (
+                {isOpen ? (
+                    <div className="flex flex-1 min-h-0 flex-col">
+                        <SidebarContent
+                            chats={chats}
+                            totalChatsCount={totalChatsCount}
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
+                            activeChatId={activeChatId}
+                            setActiveChatId={setActiveChatId}
+                            createChat={createChat}
+                            deleteChat={deleteChat}
+                            loadingChats={loadingChats}
+                            showHideButton={false}
+                        />
+                    </div>
+                ) : (
                     <div className="flex-1 flex items-center justify-center text-[10px] text-white/30 rotate-90 select-none">
                         CHATS
                     </div>
@@ -113,6 +128,9 @@ export default function Sidebar({
 
 function SidebarContent({
     chats,
+    totalChatsCount,
+    searchQuery,
+    setSearchQuery,
     activeChatId,
     setActiveChatId,
     createChat,
@@ -122,7 +140,9 @@ function SidebarContent({
     onHide,
 }) {
     const [chatToDelete, setChatToDelete] = useState(null);
-    const canDeleteChats = chats.length > 1;
+
+    const canDeleteChats = totalChatsCount > 1;
+    const isSearching = searchQuery.trim().length > 0;
 
     const handleConfirmDelete = () => {
         if (!chatToDelete) return;
@@ -142,7 +162,30 @@ function SidebarContent({
                 + New Chat
             </button>
 
-            <div className="flex-1 overflow-y-auto sleek-scrollbar">
+            <div className="mx-3 mb-3">
+                <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.04] px-2">
+                    <input
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search chats..."
+                        className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm text-white/80 placeholder:text-white/30 outline-none"
+                    />
+
+                    {searchQuery && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchQuery("")}
+                            className="text-xs text-white/40 hover:text-white"
+                            aria-label="Clear search"
+                            title="Clear search"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto sleek-scrollbar">
                 {loadingChats && (
                     <div className="px-3 py-2 text-xs text-white/40">
                         Loading…
@@ -151,7 +194,9 @@ function SidebarContent({
 
                 {!loadingChats && chats.length === 0 && (
                     <div className="px-3 py-2 text-xs text-white/40">
-                        No chats yet. Create one.
+                        {isSearching
+                            ? "No matching chats found."
+                            : "No chats yet. Create one."}
                     </div>
                 )}
 
@@ -160,7 +205,10 @@ function SidebarContent({
                         key={chat.id}
                         onClick={() => setActiveChatId(chat.id)}
                         className={`flex items-center justify-between gap-2 px-3 py-2 cursor-pointer
-                            ${chat.id === activeChatId ? "bg-zinc-800" : "hover:bg-zinc-900"}`}
+                            ${chat.id === activeChatId
+                                ? "bg-zinc-800"
+                                : "hover:bg-zinc-900"
+                            }`}
                     >
                         <span className="min-w-0 flex-1 truncate text-sm text-white/80">
                             {chat.title || "New Chat"}
