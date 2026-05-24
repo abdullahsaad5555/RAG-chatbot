@@ -4,8 +4,8 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.constants import DUMMY_USER_ID
-from app.models import Chat
+from constants import DUMMY_USER_ID
+from models import Chat
 
 
 async def get_chat_or_404(chat_id: uuid.UUID, db: AsyncSession) -> Chat:

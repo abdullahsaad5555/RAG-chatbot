@@ -3,9 +3,9 @@ import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import get_db
-from app.schemas import ChatRequest, ChatResponse
-from app.services.chat_service import send_chat_message
+from db import get_db
+from schemas import ChatRequest, ChatResponse
+from services.chat_service import send_chat_message
 
 router = APIRouter(tags=["chat"])
 

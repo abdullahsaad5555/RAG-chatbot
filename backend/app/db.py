@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from app.settings import settings
+from settings import settings
 
 # Engine created once; connection pooling handled here (scales later) [2](https://deepwiki.com/modern-python/fastapi-sqlalchemy-template/5.2-sessions-and-connections)
 engine = create_async_engine(
