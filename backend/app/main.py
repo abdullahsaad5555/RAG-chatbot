@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from settings import settings
-from db import engine
-from models import Base
-from routers import chat, chats
+from app.settings import settings
+from app.db import engine
+from app.models import Base
+from app.routers import chat, chats
 
 app = FastAPI()
 
