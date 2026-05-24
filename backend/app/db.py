@@ -1,11 +1,23 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from app.settings import settings
 
-# Engine created once; connection pooling handled here (scales later) [2](https://deepwiki.com/modern-python/fastapi-sqlalchemy-template/5.2-sessions-and-connections)
+
+connect_args = {}
+
+if settings.DATABASE_URL.startswith("sqlite"):
+    connect_args = {}
+elif settings.DATABASE_URL.startswith("postgresql"):
+    connect_args = {
+        "ssl": "require",
+        "timeout": 30,
+    }
+
+
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
-    pool_pre_ping=True,   # helps avoid stale connections [2](https://deepwiki.com/modern-python/fastapi-sqlalchemy-template/5.2-sessions-and-connections)
+    pool_pre_ping=True,
+    connect_args=connect_args,
 )
 
 SessionLocal = async_sessionmaker(
@@ -13,6 +25,7 @@ SessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
 
 async def get_db() -> AsyncSession:
     async with SessionLocal() as session:

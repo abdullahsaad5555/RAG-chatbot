@@ -1,8 +1,51 @@
 import uuid
 import datetime
-from sqlalchemy import Text, DateTime, ForeignKey, func
+
+from sqlalchemy import Text, DateTime, ForeignKey, func, CHAR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID 
+from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+
+
+class GUID(TypeDecorator):
+    """
+    Platform-independent UUID type.
+
+    - PostgreSQL: uses native UUID
+    - SQLite: stores UUID as CHAR(36)
+    """
+
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(PG_UUID(as_uuid=True))
+
+        return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+
+        if dialect.name == "postgresql":
+            if isinstance(value, uuid.UUID):
+                return value
+            return uuid.UUID(str(value))
+
+        if isinstance(value, uuid.UUID):
+            return str(value)
+
+        return str(uuid.UUID(str(value)))
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+
+        if isinstance(value, uuid.UUID):
+            return value
+
+        return uuid.UUID(str(value))
 
 
 class Base(DeclarativeBase):
@@ -13,13 +56,13 @@ class Chat(Base):
     __tablename__ = "chats"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         index=True,
         nullable=False,
     )
@@ -27,7 +70,7 @@ class Chat(Base):
     title: Mapped[str] = mapped_column(
         Text,
         nullable=False,
-        default="Default Chat",
+        default="New Chat",
     )
 
     created_at: Mapped[datetime.datetime] = mapped_column(
@@ -43,7 +86,6 @@ class Chat(Base):
         nullable=False,
     )
 
-    # ✅ Chat → many Messages
     messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="chat",
@@ -55,20 +97,27 @@ class Message(Base):
     __tablename__ = "messages"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
     )
 
     chat_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("chats.id"),
         index=True,
         nullable=False,
     )
 
-    role: Mapped[str] = mapped_column(Text, nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
+    role: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
 
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True),
@@ -76,7 +125,6 @@ class Message(Base):
         nullable=False,
     )
 
-    # ✅ Message → one Chat
     chat: Mapped["Chat"] = relationship(
         "Chat",
         back_populates="messages",
