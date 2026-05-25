@@ -1,5 +1,5 @@
 export const API_BASE =
-    import.meta.env.VITE_API_BASE_URL || "https://rag-chatbot-dnmm.onrender.com//chats";
+    import.meta.env.VITE_API_BASE_URL || "https://rag-chatbot-dnmm.onrender.com/";
 
 export async function apiFetch(path, options = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
