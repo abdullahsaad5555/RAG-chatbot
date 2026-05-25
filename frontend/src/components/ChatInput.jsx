@@ -17,7 +17,12 @@ export default function ChatInput({
                     className="flex-1 bg-transparent text-sm text-white/70 outline-none"
                 />
                 <button
-                    onClick={onSend}
+
+                    onClick={() => {
+                        console.log("SEND BUTTON CLICKED");
+                        alert("SEND BUTTON CLICKED");
+                        onSend();
+                    }}
                     disabled={isDisabled}
                     className="h-9 w-9 rounded-xl bg-white/[0.1]"
                 >
