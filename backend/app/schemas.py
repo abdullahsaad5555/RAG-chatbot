@@ -5,7 +5,7 @@ class ChatRequest(BaseModel):
     timestamp: str | None = None
 
 class ChatResponse(BaseModel):
-    reply: str
+    reply: str 
 
 class ChatTitleUpdate(BaseModel):
     title: str
