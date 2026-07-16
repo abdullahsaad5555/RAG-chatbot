@@ -1,4 +1,4 @@
-from core.logging import setup_logging, get_logger
+from app.core.logging import setup_logging, get_logger
 
 setup_logging()
 logger = get_logger(__name__)
@@ -113,7 +113,6 @@ def main():
         ids=ids
     )
 
-    client.persist()
 
     print("✅ Ingestion completed successfully")
     print(f"📊 Total vectors stored: {collection.count()}")

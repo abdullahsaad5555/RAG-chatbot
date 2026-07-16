@@ -41,9 +41,8 @@ export default function useChatSearch(chats) {
             const entries = await Promise.all(
                 chats.map(async (chat) => {
                     try {
-                        const messages = await apiFetch(
-                            `/chats/${chat.id}/messages`
-                        );
+                        const response = await apiFetch(`/chats/${chat.id}/messages?limit=${MAX_CACHE_MESSAGES_PER_CHAT}`);
+                        const messages = response?.messages ?? [];
 
                         const limitedMessages = (messages || []).slice(
                             0,

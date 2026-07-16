@@ -17,10 +17,13 @@ export default function useChatMessages(activeChatId, onTitleGenerated) {
 
         (async () => {
             try {
-                const msgs = await apiFetch(`/chats/${activeChatId}/messages`);
+                const data = await apiFetch(`/chats/${activeChatId}/messages?limit=50`);
                 if (!mounted) return;
 
-                const normalized = (msgs || []).map((m) => ({
+                // Backend now returns { messages, has_more, next_cursor }
+                const msgs = data?.messages ?? [];
+
+                const normalized = msgs.map((m) => ({
                     id: m.id,
                     role: m.role,
                     content: m.content,
@@ -48,7 +51,7 @@ export default function useChatMessages(activeChatId, onTitleGenerated) {
 
 
             if (isFirstMessage && onTitleGenerated) {
-                onTitleGenerated(activeChatId, trimmed.slice(0, 60));
+                onTitleGenerated(activeChatId, trimmed.slice(0, 60), { onlyIfDefault: true });
             }
 
 
@@ -111,9 +114,28 @@ export default function useChatMessages(activeChatId, onTitleGenerated) {
         [activeChatId, chatHistory.length, onTitleGenerated]
     );
 
-    const clearChat = useCallback(() => {
+    const clearChat = useCallback(async () => {
+        if (!activeChatId) return;
+
+        // Optimistic: clear UI immediately
+        const previous = chatHistory;
         setChatHistory([]);
-    }, []);
+
+        try {
+            await apiFetch(`/chats/${activeChatId}/messages`, {
+                method: "DELETE",
+            });
+
+            // Optional: also reset the sidebar title back to "New Chat"
+            if (onTitleGenerated) {
+                onTitleGenerated(activeChatId, "New Chat");
+            }
+        } catch (e) {
+            console.error("Failed to clear chat:", e);
+            // Rollback on error
+            setChatHistory(previous);
+        }
+    }, [activeChatId, chatHistory, onTitleGenerated]);
 
     return {
         chatHistory,

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { IoMdCloseCircle } from "react-icons/io";
-import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
+import { FiChevronRight, FiChevronLeft, FiEdit2 } from "react-icons/fi";
 
 export default function Sidebar({
     chats,
@@ -11,6 +11,7 @@ export default function Sidebar({
     setActiveChatId,
     createChat,
     deleteChat,
+    updateChatTitle,
     loadingChats,
     isOpen,
     onOpen,
@@ -67,6 +68,7 @@ export default function Sidebar({
                     }}
                     createChat={createChat}
                     deleteChat={deleteChat}
+                    updateChatTitle={updateChatTitle}
                     loadingChats={loadingChats}
                     showHideButton
                     onHide={onClose}
@@ -112,6 +114,7 @@ export default function Sidebar({
                             setActiveChatId={setActiveChatId}
                             createChat={createChat}
                             deleteChat={deleteChat}
+                            updateChatTitle={updateChatTitle}
                             loadingChats={loadingChats}
                             showHideButton={false}
                         />
@@ -135,14 +138,48 @@ function SidebarContent({
     setActiveChatId,
     createChat,
     deleteChat,
+    updateChatTitle,
     loadingChats,
     showHideButton,
     onHide,
 }) {
     const [chatToDelete, setChatToDelete] = useState(null);
+    const [editingId, setEditingId] = useState(null);
+    const [editValue, setEditValue] = useState("");
+    const editInputRef = useRef(null);
 
     const canDeleteChats = totalChatsCount > 1;
     const isSearching = searchQuery.trim().length > 0;
+
+    // Auto-focus + select text when entering edit mode
+    useEffect(() => {
+        if (editingId && editInputRef.current) {
+            editInputRef.current.focus();
+            editInputRef.current.select();
+        }
+    }, [editingId]);
+
+    const startEdit = (chat) => {
+        setEditingId(chat.id);
+        setEditValue(chat.title || "New Chat");
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditValue("");
+    };
+
+    const commitEdit = () => {
+        const trimmed = editValue.trim();
+        const currentChat = chats.find((c) => c.id === editingId);
+
+        if (trimmed && currentChat && trimmed !== currentChat.title) {
+            updateChatTitle(editingId, trimmed);
+        }
+
+        setEditingId(null);
+        setEditValue("");
+    };
 
     const handleConfirmDelete = () => {
         if (!chatToDelete) return;
@@ -203,46 +240,82 @@ function SidebarContent({
                 {chats.map((chat) => (
                     <div
                         key={chat.id}
-                        onClick={() => setActiveChatId(chat.id)}
+                        onClick={() => {
+                            if (editingId !== chat.id) {
+                                setActiveChatId(chat.id);
+                            }
+                        }}
+                        onDoubleClick={() => startEdit(chat)}
                         className={`flex items-center justify-between gap-2 px-3 py-2 cursor-pointer
-                            ${chat.id === activeChatId
+            ${chat.id === activeChatId
                                 ? "bg-zinc-800"
                                 : "hover:bg-zinc-900"
                             }`}
                     >
-                        <span className="min-w-0 flex-1 truncate text-sm text-white/80">
-                            {chat.title || "New Chat"}
-                        </span>
+                        {editingId === chat.id ? (
+                            <input
+                                ref={editInputRef}
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") commitEdit();
+                                    if (e.key === "Escape") cancelEdit();
+                                }}
+                                onBlur={commitEdit}
+                                maxLength={60}
+                                className="min-w-0 flex-1 rounded bg-zinc-900 px-2 py-1 text-sm text-white outline-none border border-white/20"
+                            />
+                        ) : (
+                            <span className="min-w-0 flex-1 truncate text-sm text-white/80">
+                                {chat.title || "New Chat"}
+                            </span>
+                        )}
 
-                        <button
-                            type="button"
-                            disabled={!canDeleteChats}
-                            className={[
-                                "shrink-0 transition-colors",
-                                canDeleteChats
-                                    ? "text-zinc-400 hover:text-red-400 cursor-pointer"
-                                    : "text-zinc-700 cursor-not-allowed opacity-40",
-                            ].join(" ")}
-                            onClick={(e) => {
-                                e.stopPropagation();
+                        {editingId !== chat.id && (
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        startEdit(chat);
+                                    }}
+                                    className="text-zinc-400 hover:text-white cursor-pointer"
+                                    aria-label="Rename chat"
+                                    title="Rename"
+                                >
+                                    <FiEdit2 size={14} />
+                                </button>
 
-                                if (!canDeleteChats) return;
-
-                                setChatToDelete(chat);
-                            }}
-                            aria-label={
-                                canDeleteChats
-                                    ? "Delete chat"
-                                    : "Cannot delete the last chat"
-                            }
-                            title={
-                                canDeleteChats
-                                    ? "Delete chat"
-                                    : "At least one chat is required"
-                            }
-                        >
-                            <IoMdCloseCircle />
-                        </button>
+                                <button
+                                    type="button"
+                                    disabled={!canDeleteChats}
+                                    className={[
+                                        "transition-colors",
+                                        canDeleteChats
+                                            ? "text-zinc-400 hover:text-red-400 cursor-pointer"
+                                            : "text-zinc-700 cursor-not-allowed opacity-40",
+                                    ].join(" ")}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (!canDeleteChats) return;
+                                        setChatToDelete(chat);
+                                    }}
+                                    aria-label={
+                                        canDeleteChats
+                                            ? "Delete chat"
+                                            : "Cannot delete the last chat"
+                                    }
+                                    title={
+                                        canDeleteChats
+                                            ? "Delete chat"
+                                            : "At least one chat is required"
+                                    }
+                                >
+                                    <IoMdCloseCircle />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -267,7 +340,7 @@ function SidebarContent({
                         <p className="mb-4 text-sm text-white/60">
                             Are you sure you want to delete{" "}
                             <span className="text-white/90">
-                                “{chatToDelete.title || "New Chat"}”
+                                "{chatToDelete.title || "New Chat"}"
                             </span>
                             ? This action cannot be undone.
                         </p>

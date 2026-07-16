@@ -16,7 +16,7 @@ export default function useChats() {
                 if (!mounted) return;
 
                 setChats(data || []);
-                setActiveChatId(data?.[0]?.id ?? null);
+                //setActiveChatId(data?.[0]?.id ?? null);
             } catch (e) {
                 console.error("Failed to load chats:", e);
             } finally {
@@ -53,34 +53,36 @@ export default function useChats() {
         [chats]
     );
 
-    const updateChatTitle = useCallback(async (chatId, title) => {
+    const updateChatTitle = useCallback(async (chatId, title, options = {}) => {
         if (!chatId || !title?.trim()) return;
 
         const cleanTitle = title.trim().slice(0, 60);
+        const { onlyIfDefault = false } = options;
 
-        // Update sidebar instantly
+        // Update sidebar instantly (optimistic)
         setChats((prev) =>
-            prev.map((chat) =>
-                chat.id === chatId && (!chat.title || chat.title === "New Chat")
-                    ? {
-                        ...chat,
-                        title: cleanTitle,
-                        updated_at: new Date().toISOString(),
-                    }
-                    : chat
-            )
+            prev.map((chat) => {
+                if (chat.id !== chatId) return chat;
+
+                // Skip if onlyIfDefault=true and chat already has a custom title
+                if (onlyIfDefault && chat.title && chat.title !== "New Chat") {
+                    return chat;
+                }
+
+                return {
+                    ...chat,
+                    title: cleanTitle,
+                    updated_at: new Date().toISOString(),
+                };
+            })
         );
 
-        // Save to backend/database
+        // Save to backend
         try {
             await apiFetch(`/chats/${chatId}`, {
                 method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    title: cleanTitle,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: cleanTitle }),
             });
         } catch (e) {
             console.error("Failed to update chat title:", e);

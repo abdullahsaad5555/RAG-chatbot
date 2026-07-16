@@ -11,6 +11,8 @@ from app.services.chat_service import (
     update_user_chat_title,
     delete_user_chat,
     get_chat_messages,
+    search_user_chats,
+    clear_chat_messages,
 )
 
 router = APIRouter(prefix="/chats", tags=["chats"])
@@ -24,6 +26,14 @@ async def list_chats(db: AsyncSession = Depends(get_db)):
 @router.post("")
 async def create_chat(db: AsyncSession = Depends(get_db)):
     return await create_user_chat(db)
+
+
+@router.get("/search")   # ← NEW ROUTE, placed before /{chat_id}
+async def search_chats(
+    q: str = "",
+    db: AsyncSession = Depends(get_db),
+):
+    return await search_user_chats(query=q, db=db)
 
 
 @router.patch("/{chat_id}")
@@ -50,6 +60,20 @@ async def delete_chat(
 @router.get("/{chat_id}/messages")
 async def get_messages(
     chat_id: uuid.UUID,
+    limit: int = 50,
+    before: uuid.UUID | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    return await get_chat_messages(chat_id, db)
+    return await get_chat_messages(
+        chat_id=chat_id,
+        db=db,
+        limit=limit,
+        before=before,
+    )
+
+@router.delete("/{chat_id}/messages")
+async def clear_messages(
+    chat_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    return await clear_chat_messages(chat_id, db)
