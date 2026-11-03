@@ -230,6 +230,10 @@ _pkginfo.txt
 !?*.[Cc]ache/
 
 .env
+.DS_Store
+
+/backend/models/
+/backend/qwen-4bit/
 # Others
 ClientBin/
 ~$*
