@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-
+from app.llm.generator import generate
 from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -140,8 +140,15 @@ async def send_chat_message(
         chat.title = clean_message[:60]
 
     # 3. Static bot reply for now
-    reply_text = "The bot has replied. Please ask another question"
-
+# 3. Generate reply using the local Qwen model
+    try:
+        reply_text = await generate(clean_message)
+    except Exception as e:
+        print(f"LLM generation failed: {e}")
+        raise HTTPException(
+        status_code=503,
+        detail="The local AI model is currently unavailable.",
+        )
     # 4. Store bot message
     bot_msg = Message(
         chat_id=chat.id,
