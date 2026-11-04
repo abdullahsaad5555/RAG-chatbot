@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+import requests
 
+url = "https://jsonplaceholder.typicode.com/users"
 
-app = FastAPI()
+result = requests.get(url,verify=False)
 
-
-@app.post('/chat')
-def create_response():
+result=result.json()
+for ent in result:
+    print(ent['username'])
