@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from app.llm.generator import generate
+from app.services.rag_service import answer
 from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -142,7 +142,7 @@ async def send_chat_message(
     # 3. Static bot reply for now
 # 3. Generate reply using the local Qwen model
     try:
-        reply_text = await generate(clean_message)
+            reply_text = await answer(clean_message)
     except Exception as e:
         print(f"LLM generation failed: {e}")
         raise HTTPException(
