@@ -27,7 +27,10 @@ export default function App() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     return (
-        <div className="flex h-screen w-screen bg-[#09090b] overflow-hidden font-sans text-white">
+        <div
+            className="flex h-screen w-screen overflow-hidden font-sans"
+            style={{ background: "var(--bg-app)", color: "var(--text-primary)" }}
+        >
             <AnimatedBackground />
 
             <Routes>

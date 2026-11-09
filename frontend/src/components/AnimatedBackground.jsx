@@ -40,6 +40,7 @@ export default function AnimatedBackground() {
         <div className="animated-bg" aria-hidden="true">
             <div className="bg-glow bg-glow-one" />
             <div className="bg-glow bg-glow-two" />
+            <div className="bg-glow bg-glow-three" />
 
             {particles.map((particle) => (
                 <span

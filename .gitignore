@@ -234,6 +234,7 @@ _pkginfo.txt
 
 /backend/models/
 /backend/qwen-4bit/
+
 # Others
 ClientBin/
 ~$*

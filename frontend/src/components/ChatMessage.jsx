@@ -28,12 +28,11 @@ export default function ChatMessage({ message }) {
         <div className={`group flex ${isUser ? "justify-end" : "justify-start"}`}>
             <div className="flex max-w-[85%] flex-col gap-1">
                 <div
-                    className={[
-                        "rounded-2xl px-4 py-2 text-sm",
-                        isUser
-                            ? "bg-indigo-500/20 text-indigo-50"
-                            : "bg-white/[0.06] text-white/80",
-                    ].join(" ")}
+                    className="rounded-2xl px-4 py-2 text-sm"
+                    style={{
+                        background: isUser ? "var(--user-bubble-bg)" : "var(--bot-bubble-bg)",
+                        color: isUser ? "var(--user-bubble-text)" : "var(--bot-bubble-text)",
+                    }}
                 >
                     {message.typing ? (
                         <TypingIndicator />
@@ -50,13 +49,15 @@ export default function ChatMessage({ message }) {
                                             {...props}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-cyan-300 underline decoration-cyan-500/40 hover:decoration-cyan-400"
+                                            style={{ color: "var(--accent-primary)" }}
+                                            className="underline hover:opacity-80"
                                         />
                                     ),
                                     code: ({ inline, className, children, ...props }) =>
                                         inline ? (
                                             <code
-                                                className="rounded bg-white/[0.08] px-1 py-0.5 text-[13px]"
+                                                className="rounded px-1 py-0.5 text-[13px]"
+                                                style={{ background: "var(--code-inline-bg)" }}
                                                 {...props}
                                             >
                                                 {children}
@@ -75,8 +76,9 @@ export default function ChatMessage({ message }) {
                 </div>
 
                 <div
-                    className={`flex items-center gap-2 px-1 text-[10px] text-white/30 ${isUser ? "justify-end" : "justify-start"
+                    className={`flex items-center gap-2 px-1 text-[10px] ${isUser ? "justify-end" : "justify-start"
                         }`}
+                    style={{ color: "var(--text-faint)" }}
                 >
                     <span>{isUser ? "You" : "YasrefAI"}</span>
 
@@ -84,7 +86,8 @@ export default function ChatMessage({ message }) {
                         <button
                             type="button"
                             onClick={handleCopy}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/40 hover:text-white/80"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity hover:opacity-100"
+                            style={{ color: "var(--text-muted)" }}
                             aria-label="Copy message"
                             title={copied ? "Copied!" : "Copy"}
                         >

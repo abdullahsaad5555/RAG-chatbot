@@ -43,33 +43,35 @@ export default function ChatLayout({
                 ☰
             </button>
 
-            {!isSidebarOpen && (
-                <button
-                    type="button"
-                    onClick={onOpenSidebar}
-                    className="
-      hidden md:block
-      fixed left-[20px] top-[10%]
-      rotate-90 origin-left
-      bg-[#43ff8b8c]
-      text-[10px] font-medium
-      px-3 py-2
-      rounded-t-md
-      z-50
-      hover:bg-[#43ff8bcc]
-      transition-colors
-    "
-                    aria-label="Show chats"
-                    title="Show chats"
-                >
-                    Chats
-                </button>
-            )}
+    {/*        {!isSidebarOpen && (*/}
+    {/*            <button*/}
+    {/*                type="button"*/}
+    {/*                onClick={onOpenSidebar}*/}
+    {/*                className="*/}
+    {/*  hidden md:block*/}
+    {/*  fixed left-[20px] top-[10%]*/}
+    {/*  rotate-90 origin-left*/}
+    {/*  bg-[#43ff8b8c]*/}
+    {/*  text-[10px] font-medium*/}
+    {/*  px-3 py-2*/}
+    {/*  rounded-t-md*/}
+    {/*  z-50*/}
+    {/*  hover:bg-[#43ff8bcc]*/}
+    {/*  transition-colors*/}
+    {/*"*/}
+    {/*                aria-label="Show chats"*/}
+    {/*                title="Show chats"*/}
+    {/*            >*/}
+    {/*                Chats*/}
+    {/*            </button>*/}
+    {/*        )}*/}
 
 
             <Header hasChat={chatHistory.length > 0} onClear={clearChat} />
 
-            {chatHistory.length === 0 && <Landing />}
+            {chatHistory.length === 0 && (
+                <Landing onPromptSelect={(p) => setMessage(p)} />
+            )}
 
             {chatHistory.length > 0 && (
                 <ChatPane chatHistory={chatHistory} bottomRef={bottomRef} />
