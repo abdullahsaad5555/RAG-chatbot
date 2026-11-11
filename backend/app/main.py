@@ -1,3 +1,7 @@
+import asyncio
+
+from app.ingestion.pipeline import rebuild_index
+from app.ingestion.watcher import start_watcher
 from contextlib import asynccontextmanager
 import logging
 
@@ -37,9 +41,15 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
+    observer = start_watcher()                                  
+
+    asyncio.get_running_loop().run_in_executor(None, rebuild_index) 
+
     yield
 
+    observer.stop()                                            
     logger.info("Shutting down FastAPI app...")
+
 
 
 app = FastAPI(

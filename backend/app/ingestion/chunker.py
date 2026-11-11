@@ -18,7 +18,18 @@ def _is_heading(line):
     """Guess whether a line is a section heading."""
     line = line.strip()
 
-    if not line or len(line) > 80:
+    if not line:
+        return False
+
+    # Markdown heading: "# Title", "## Section"
+    if line.startswith("#"):
+        return True
+
+    # Markdown table row, never a heading
+    if line.startswith("|"):
+        return False
+
+    if len(line) > 80:
         return False
     if line.endswith((".", ",", ";")):
         return False
@@ -51,7 +62,7 @@ def _blocks(text):
             continue
 
         if _is_heading(lines[0]):
-            yield lines[0].rstrip(":").strip(), "\n".join(lines[1:])
+            yield lines[0].lstrip("#").rstrip(":").strip(), "\n".join(lines[1:])
         else:
             yield None, "\n".join(lines)
 
