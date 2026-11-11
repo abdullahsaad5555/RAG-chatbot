@@ -15,3 +15,7 @@ downaload postgresql17, then run
 
  .\pg_ctl.exe -D "C:\Program Files\PostgreSQL\17\data" start
 
+
+To run front end: 
+npm install
+npm run dev
